@@ -16,6 +16,7 @@ library(glmnet)
 #default is alpha=1 (LASSO) and family=gaussian
 #alpha is the penalty parameter
 lasso1<-glmnet(W,Y)
+plot(lasso1)
 
 cv.lasso1<-cv.glmnet(W,Y)
 plot(cv.lasso1)
