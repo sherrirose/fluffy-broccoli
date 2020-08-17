@@ -12,21 +12,15 @@ W <- matrix(c(W1,W2,W3,W4), nrow=n, ncol=4)
 colnames(W)<-c("W1","W2","W3","W4")
 
 library(glmnet)
-
-#default is alpha=1 (LASSO) and family=gaussian
-#alpha is the penalty parameter
 lasso1<-glmnet(W,Y)
-plot(lasso1)
+plot(lasso1, label=TRUE)
+lasso1
 
 cv.lasso1<-cv.glmnet(W,Y)
 plot(cv.lasso1)
+coef(cv.lasso1, s="lambda.min")
 
-#lambda is the regularization parameter
-select_lambda<-cv.lasso1$lambda.min
-coef(cv.lasso1)
-
-pylasso1<-predict(cv.lasso1, newx=W)
-head(pylasso1)
+head(predict(cv.lasso1, newx = W, s = "lambda.min"))
 
 ##################################################################
 ##RIDGE                                                         ##
@@ -34,15 +28,12 @@ head(pylasso1)
 ##################################################################
 
 ridge1<-glmnet(W,Y, alpha=0)
+plot(ridge1, label=TRUE)
+ridge1
 
 cv.ridge1<-cv.glmnet(W,Y,alpha=0)
 plot(cv.ridge1)
-
-select_lambda<-cv.ridge1$lambda.min
-coef(cv.ridge1)
-
-pyridge1<-predict(cv.ridge1, newx=W)
-head(pyridge1)
+coef(cv.ridge1, s="lambda.min")
 
 ##################################################################
 ##RPART                                                         ##
@@ -52,12 +43,10 @@ head(pyridge1)
 library(rpart)
 
 rpart1<-rpart(Y~W1+W2)
-
 plot(rpart1)
 text(rpart1, use.n=TRUE, cex=0.79)
 
-pyrpart1<-predict(rpart1)
-head(pyrpart1)
+head(predict(rpart1))
 
 ##################################################################
 ##ENSEMBLING!                                                   ##
@@ -84,6 +73,9 @@ fit.data.SL<-SuperLearner(Y=data[,6],X=data[,1:5],
 	SL.library=SL.library, family=binomial(),
 	method="method.NNLS", verbose=TRUE)
 
+#CV risks for algorithms in the library
+fit.data.SL
+
 #Run the cross-validated super learner to obtain its CV risk
 fitSL.data.CV <- CV.SuperLearner(Y=data[,6],X=data[,1:5], V=10,
 	SL.library=SL.library, verbose = TRUE,
@@ -91,6 +83,3 @@ fitSL.data.CV <- CV.SuperLearner(Y=data[,6],X=data[,1:5], V=10,
 
 #CV risk for super learner
 mean((data[,6]-fitSL.data.CV$SL.predict)^2)
-
-#CV risks for algorithms in the library
-fit.data.SL
